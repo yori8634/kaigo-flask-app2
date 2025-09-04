@@ -40,12 +40,14 @@ def index():
 
         df = pd.read_csv(filepath)
         df[['is_applicable', 'reason']] = df.apply(judge_kaigo_applicability, axis=1, result_type='expand')
-        output_path = os.path.join(UPLOAD_FOLDER, '判定結果.csv')
-        df.to_csv(output_path, index=False)
 
-        return send_file(output_path, as_attachment=True)
+        # HTML表示用にテーブル変換
+        table_html = df.to_html(classes='table table-bordered', index=False, justify='center')
+        return render_template('index.html', table=table_html)
 
-    return render_template('index.html')
+    return render_template('index.html', table=None)
 
+# ✅ Render対応の起動設定
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
