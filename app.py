@@ -31,23 +31,31 @@ def judge_kaigo_applicability(row):
     else:
         return False, "対象外の改修内容"
 
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         file = request.files['file']
-        filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+        filename = file.filename
+
+        # 拡張子チェック
+        if not filename.endswith('.xlsx'):
+            return "<h3>エラー：Excelファイル（.xlsx）のみアップロード可能です。</h3>"
+
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
 
         try:
-            # Excelファイルとして読み込む
             df = pd.read_excel(filepath, engine='openpyxl')
             df[['is_applicable', 'reason']] = df.apply(judge_kaigo_applicability, axis=1, result_type='expand')
             table_html = df.to_html(classes='table table-bordered', index=False, justify='center')
             return render_template('index.html', table=table_html)
         except Exception as e:
-            return f"<h3>エラーが発生しました：</h3><pre>{str(e)}</pre>"
+            return f"<h3>ファイル読み込み中にエラーが発生しました：</h3><pre>{str(e)}</pre>"
 
     return render_template('index.html', table=None)
+
 
 # Render対応の起動設定
 if __name__ == '__main__':
