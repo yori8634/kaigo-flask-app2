@@ -1,5 +1,5 @@
 
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template
 import pandas as pd
 import os
 
@@ -38,16 +38,18 @@ def index():
         filepath = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(filepath)
 
-        df = pd.read_csv(filepath)
-        df[['is_applicable', 'reason']] = df.apply(judge_kaigo_applicability, axis=1, result_type='expand')
-
-        # HTML表示用にテーブル変換
-        table_html = df.to_html(classes='table table-bordered', index=False, justify='center')
-        return render_template('index.html', table=table_html)
+        try:
+            # Excelファイルとして読み込む
+            df = pd.read_excel(filepath, engine='openpyxl')
+            df[['is_applicable', 'reason']] = df.apply(judge_kaigo_applicability, axis=1, result_type='expand')
+            table_html = df.to_html(classes='table table-bordered', index=False, justify='center')
+            return render_template('index.html', table=table_html)
+        except Exception as e:
+            return f"<h3>エラーが発生しました：</h3><pre>{str(e)}</pre>"
 
     return render_template('index.html', table=None)
 
-# ✅ Render対応の起動設定
+# Render対応の起動設定
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
