@@ -18,8 +18,8 @@ def judge_kaigo_applicability(row):
             height = int(row['detail'].replace("段差", "").replace("cm", "").strip())
             if height >= 3:
                 return True, f"{height}cmの段差解消は対象"
-        except:
-            return False, "段差高さ不明"
+        except Exception as e:
+            return False, f"段差高さ不明（{str(e)}）"
     elif row['work_type'] == "床材変更" and "滑り" in row['detail']:
         return True, "滑り防止床材は対象"
     elif row['work_type'] == "扉交換" and "引き戸" in row['detail']:
@@ -31,23 +31,27 @@ def judge_kaigo_applicability(row):
     else:
         return False, "対象外の改修内容"
 
-
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
+        if 'file' not in request.files:
+            return "<h3>ファイルがアップロードされていません。</h3>"
+
         file = request.files['file']
         filename = file.filename
 
-        # 拡張子チェック
-        if not filename.endswith('.xlsx'):
-            return "<h3>エラー：Excelファイル（.xlsx）のみアップロード可能です。</h3>"
+        if not filename.endswith(('.xlsx', '.csv')):
+            return "<h3>エラー：Excel（.xlsx）またはCSV（.csv）ファイルのみアップロード可能です。</h3>"
 
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
 
         try:
-            df = pd.read_excel(filepath, engine='openpyxl')
+            if filename.endswith('.xlsx'):
+                df = pd.read_excel(filepath, engine='openpyxl')
+            else:
+                df = pd.read_csv(filepath)
+
             df[['is_applicable', 'reason']] = df.apply(judge_kaigo_applicability, axis=1, result_type='expand')
             table_html = df.to_html(classes='table table-bordered', index=False, justify='center')
             return render_template('index.html', table=table_html)
@@ -56,8 +60,6 @@ def index():
 
     return render_template('index.html', table=None)
 
-
-# Render対応の起動設定
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
