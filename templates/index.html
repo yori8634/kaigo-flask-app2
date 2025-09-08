@@ -3,13 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <title>介護リフォーム判定アプリ</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 2em;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        .result {
+            margin-top: 2em;
+        }
+        table {
+            border-collapse: collapse;
+            border: 1px solid #ccc;
+        }
+        table th, table td {
+            border: 1px solid #ccc;
+            padding: 4px 8px;
+        }
+    </style>
 </head>
 <body>
     <h2>ExcelまたはCSVファイルをアップロードしてください</h2>
     <form action="/" method="post" enctype="multipart/form-data">
         <!-- CSVだけでなくExcel形式も選択できるようにする -->
-        <input type="file" name="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required>
+        <input type="file" name="file" 
+               accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" 
+               required>
         <button type="submit">アップロードして判定</button>
     </form>
+
+    <!-- 結果表示 -->
+    {% if table %}
+    <div class="result">
+        <h3>判定結果</h3>
+        {{ table | safe }}
+    </div>
+    {% endif %}
+
 </body>
 </html>
