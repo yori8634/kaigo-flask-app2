@@ -5,11 +5,11 @@
     <title>介護リフォーム判定アプリ</title>
 </head>
 <body>
-    <h2>エクセルファイル.xlsx をアップロードしてください</h2>
+    <h2>ExcelまたはCSVファイルをアップロードしてください</h2>
     <form action="/" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".csv" required>
+        <!-- CSVだけでなくExcel形式も選択できるようにする -->
+        <input type="file" name="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required>
         <button type="submit">アップロードして判定</button>
     </form>
 </body>
-
 </html>
