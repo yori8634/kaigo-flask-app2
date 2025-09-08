@@ -47,16 +47,13 @@ def index():
         file.save(filepath)
 
         try:
-            
-f filename.endswith('.xlsx'):
-    df = pd.read_excel(filepath, engine='openpyxl')
-else:
-    try:
-        df = pd.read_csv(filepath, encoding='utf-8')
-    except UnicodeDecodeError:
-        df = pd.read_csv(filepath, encoding='shift_jis')
-
-            
+            if filename.endswith('.xlsx'):
+                df = pd.read_excel(filepath, engine='openpyxl')
+            else:
+                try:
+                    df = pd.read_csv(filepath, encoding='utf-8')
+                except UnicodeDecodeError:
+                    df = pd.read_csv(filepath, encoding='shift_jis')
 
             df[['is_applicable', 'reason']] = df.apply(judge_kaigo_applicability, axis=1, result_type='expand')
             table_html = df.to_html(classes='table table-bordered', index=False, justify='center')
